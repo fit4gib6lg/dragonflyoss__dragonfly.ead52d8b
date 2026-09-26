@@ -576,7 +576,7 @@ func (cfg *Config) Validate() error {
 			return errors.New("mysql requires parameter host")
 		}
 
-		if cfg.Database.Mysql.Port < 0 {
+		if cfg.Database.Mysql.Port <= 0 {
 			return errors.New("mysql requires parameter port")
 		}
 
@@ -638,7 +638,7 @@ func (cfg *Config) Validate() error {
 			return errors.New("polardb requires parameter password")
 		}
 
-		if cfg.Database.Polardb.AddrList == "" || !strings.Contains(cfg.Database.Polardb.AddrList, ",") {
+		if cfg.Database.Polardb.AddrList == "" || !strings.Contains(cfg.Database.Polardb.AddrList, ":") {
 			return errors.New("polardb requires parameter addrList, format: \"host1:port1,host2:port2\"")
 		}
 
@@ -651,7 +651,7 @@ func (cfg *Config) Validate() error {
 		return errors.New("redis requires parameter addrs")
 	}
 
-	if cfg.Database.Redis.DB <= 0 {
+	if cfg.Database.Redis.DB < 0 {
 		return errors.New("redis requires parameter db")
 	}
 
@@ -676,7 +676,7 @@ func (cfg *Config) Validate() error {
 				return errors.New("redis tls requires parameter caCert or insecureSkipVerify")
 			}
 
-			if (tls.Cert == "") || (tls.Key == "") {
+			if (tls.Cert == "") != (tls.Key == "") {
 				return errors.New("redis tls cert and key must be provided together")
 			}
 		}
@@ -694,7 +694,7 @@ func (cfg *Config) Validate() error {
 		return errors.New("local requires parameter ttl")
 	}
 
-	if cfg.Job.SyncPeers.Interval < MinJobSyncPeersInterval {
+	if cfg.Job.SyncPeers.Interval <= MinJobSyncPeersInterval {
 		return errors.New("syncPeers requires parameter interval and it must be greater than 12 hours")
 	}
 
